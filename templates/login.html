@@ -2,5 +2,18 @@
 
 {% block body %}
 
+<form method="POST" action="{{ url_for('login') }}">
+    <h2>Login</h2>
+    <label for="usernameOrEmail">Username or Email:</label>
+    <input type="text" id="usernameOrEmail" name="usernameOrEmail" required><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    <input type="checkbox" onclick="togglePassword()">Show Password<br><br>
+    
+    <button type="submit">Login</button>
+</form>
+
+<p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
 
 {% endblock %}
