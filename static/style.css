@@ -1,0 +1,32 @@
+
+/* ============================================================
+    Success and error notification banners rendered by layout.html.
+    Colour conventions follow established web standards (red=error, green=success)
+    ensuring immediate comprehension without needing to read the text (UX).
+   ============================================================ */
+ 
+.flash-messages {
+    margin-bottom: 20px;
+}
+ 
+.error, .success {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-weight: 500;     /* Medium weight — prominent without being aggressive */
+}
+ 
+/* Error state: red — universally understood as a warning/failure signal */
+.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+ 
+/* Success state: green — confirms an action completed as expected */
+.success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+ 
