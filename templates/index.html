@@ -2,5 +2,66 @@
 
 {% block body %}
 
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
+<form method="POST" action="{{ url_for('submitJourney') }}">
+    <h2>Submit Journey</h2>
+    <div id='stations'>
+
+        <label for="startLocation">Start Station: &#x1F50E;</label>
+        <select id="startLocation" name="startLocation" required>
+            <option value=""></option>
+            {% for station in stations %}
+                {% if station != 'Select A Station' %}
+                    <option value="{{ station }}">{{ station }}</option>
+                {% endif %}
+            {% endfor %}
+        </select><br><br>
+        <select id="startSetDropdown" name="startSetDropdown" required>
+        {% for train in trains %}
+            <option value="{{ train }}">{{ train }}</option>
+        {% endfor %}
+        </select><br><br>
+
+        <div id="middleStops"></div>
+
+        <label for="endLocation">End Station: &#x1F50E;</label>
+        <select id="endLocation" name="endLocation" required>
+            <option value=""></option>
+            {% for station in stations %}
+                {% if station != 'Select A Station' %}
+                    <option value="{{ station }}">{{ station }}</option>
+                {% endif %}
+            {% endfor %}
+        </select><br><br>
+
+    </div>
+
+    <button type="button" id="add-btn">Add Interchange</button><br><br>
+
+    
+    <div id="journey-results"></div><br>
+
+    <button type="submit" id="submitJourney">Submit</button>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#startLocation').select2({
+                placeholder: 'Select a station',
+                allowClear: false
+            });
+            $('#endLocation').select2({
+                placeholder: 'Select a station',
+                allowClear: false
+            });
+
+            
+            $('#startLocation, #endLocation').on('change', updateJourney);
+            $('#startLocation, #endLocation').on('change', checkAddBtn);
+        });
+    </script>
+</form>
 {% endblock %}

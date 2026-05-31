@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import Config
 from extensions import mail, initDB, verifyConfirmationToken, sendConfirmationEmail
+from trainStations import calculateLineSegment, addStations #If SQL Database is deleted, run this function to re-add stations from trainStations.py
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -14,6 +15,12 @@ mail.init_app(app)
 
 with app.app_context():
     initDB()
+    
+global trainSets
+trainSets = ["Select A Train", "Waratah Series 2 | B Set", "Waratah Series 1 | A Set", "Millennium | M Set", "Alstom Metropolis", "Mariyung | D Set", "Tangara | T Set", "Oscar | H Set", "K Set"]
+
+global stationsList
+stationsList = ['Allawah', 'Arncliffe', 'Artarmon', 'Ashfield', 'Asquith', 'Auburn', 'Banksia', 'Bankstown', 'Bardwell Park', 'Beecroft', 'Berala', 'Berowra', 'Bella Vista', 'Beverly Hills', 'Bexley North', 'Birrong', 'Blacktown', 'Bondi Junction', 'Barangaroo', 'Burwood', 'Cabramatta', 'Campbelltown', 'Canley Vale', 'Caringbah', 'Carlton', 'Carramar', 'Casula', 'Castle Hill', 'Central', 'Chatswood', 'Cheltenham', 'Chester Hill', 'Cherrybrook', 'Circular Quay', 'Clarendon', 'Clyde', 'Como', 'Concord West', 'Cronulla', 'Croydon', 'Crows Nest', 'Denistone', 'Domestic Airport', 'Doonside', 'East Hills', 'East Richmond', 'Eastwood', 'Edgecliff', 'Edmondson Park', 'Emu Plains', 'Engadine', 'Epping', 'Erskineville', 'Fairfield', 'Flemington', 'Gadigal', 'Glenfield', 'Gordon', 'Granville', 'Green Square', 'Guildford', 'Gymea', 'Harris Park', 'Heathcote', 'Hills Showground', 'Holsworthy', 'Homebush', 'Hornsby', 'Hurstville', 'Ingleburn', 'International Airport', 'Jannali', 'Kellyville', 'Killara', 'Kings Cross', 'Kingsgrove', 'Kingswood', 'Kirrawee', 'Kogarah', 'Leightonfield', 'Leppington', 'Leumeah', 'Lewisham', 'Lidcombe', 'Lindfield', 'Liverpool', 'Loftus', 'Macarthur', 'Macdonaldtown', 'Macquarie Park', 'Macquarie Fields', 'Macquarie University', 'Marayong', 'Martin Place', 'Mascot', 'Meadowbank', 'Merrylands', 'Milsons Point', 'Minto', 'Miranda', 'Mortdale', 'Mount Colah', 'Mount Druitt', 'Mount Kuring-gai', 'Mulgrave', 'Museum', 'Narwee', 'Newtown', 'Normanhurst', 'North Strathfield', 'North Ryde', 'North Sydney', 'Norwest', 'Oatley', 'Olympic Park', 'Padstow', 'Panania', 'Parramatta', 'Pendle Hill', 'Pennant Hills', 'Penrith', 'Penshurst', 'Petersham', 'Pymble', 'Quakers Hill', 'Redfern', 'Regents Park', 'Revesby', 'Rhodes', 'Richmond', 'Riverstone', 'Riverwood', 'Rockdale', 'Rooty Hill', 'Roseville', 'Rouse Hill', 'Schofields', 'Sefton', 'Seven Hills', 'St James', 'St Leonards', 'St Marys', 'St Peters', 'Stanmore', 'Strathfield', 'Summer Hill', 'Sutherland', 'Sydenham', 'Tallawong', 'Tempe', 'Thornleigh', 'Toongabbie', 'Town Hall', 'Turramurra', 'Turrella', 'Victoria Cross', 'Villawood', 'Vineyard', 'Wahroonga', 'Waitara', 'Warrawee', 'Warwick Farm', 'Waterfall', 'Waterloo', 'Waverton', 'Wentworthville', 'Werrington', 'West Ryde', 'Westmead', 'Windsor', 'Wolli Creek', 'Wollstonecraft', 'Woolooware', 'Wynyard', 'Yagoona', 'Yennora']
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -27,12 +34,12 @@ def register():
         password = request.form['password']
         confirmPassword = request.form['confirmPassword']
 
-        if password != confirmPassword:
-            flash("Passwords do not match.", "error")
-            return redirect(url_for('register'))
-
         if not fName or not lName or not email or not username or not displayName or not password or not confirmPassword:
             flash("All fields are required.", "error")
+            return redirect(url_for('register'))
+
+        if password != confirmPassword:
+            flash("Passwords do not match.", "error")
             return redirect(url_for('register'))
 
         conn = sqlite3.connect(current_app.config['DATABASE'])
@@ -129,12 +136,6 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/')
-def index():
-    if 'userID' not in session:
-        return redirect(url_for('login'))
-    return render_template('index.html')
-
 @app.route('/confirm/<token>')
 def confirm_email(token):
     try:
@@ -152,6 +153,65 @@ def confirm_email(token):
     flash("Email confirmed! You can now log in.", "success")
     return redirect(url_for('login'))
 
+
+@app.route('/')
+def index():
+    if 'userID' not in session:
+        return redirect(url_for('login'))
+    
+    global trainSets, stationsList
+    return render_template('index.html', trains=trainSets, stations=stationsList)
+
+@app.route('/submitJourney', methods=['POST'])
+def submitJourney():
+    if 'userID' not in session:
+        flash("Please log in to submit a journey.", "error")
+        return redirect(url_for('login'))
+    firstStop = escape(request.form['startLocation'])
+    middleStops = [escape(stop) for stop in request.form.getlist('middle')]
+    lastStop = escape(request.form['endLocation'])
+    
+    firstTrain = escape(request.form['startSetDropdown'])
+    middleTrains = [escape(train) for train in request.form.getlist('middleSetDropdown')]
+
+    if not firstStop or not lastStop or not firstTrain:
+        flash("Please fill in all required fields.", "error")
+        return redirect(url_for('index'))
+
+    conn = sqlite3.connect(current_app.config['DATABASE'])
+    cursor = conn.cursor()
+
+    cursor.execute('INSERT INTO trips (user_id) VALUES (?)', (session['userID'],))
+    trip_id = cursor.lastrowid
+
+    allStops = [firstStop] + middleStops + [lastStop]
+    allTrains = [firstTrain] + middleTrains
+
+    for i in range(len(allStops) - 1):
+        currentStop = allStops[i]
+        nextStop = allStops[i + 1]
+        currentTrain = allTrains[i] if i < len(allTrains) else None
+
+        cursor.execute("SELECT id FROM stations WHERE name = ?", (currentStop,))
+        row = cursor.fetchone()
+        station_id = row[0] if row else None
+
+        lines = calculateLineSegment(currentStop, nextStop)
+        lineSegment = ', '.join(lines) if lines else ''
+
+        cursor.execute("INSERT INTO trip_stops (trip_id, station_id, stop_order, line_segment, train_set) VALUES (?, ?, ?, ?, ?)",
+                       (trip_id, station_id, i, lineSegment, currentTrain))
+        
+    cursor.execute("SELECT id FROM stations WHERE name = ?", (lastStop,))
+    row = cursor.fetchone()
+    station_id = row[0] if row else None
+    cursor.execute("INSERT INTO trip_stops (trip_id, station_id, stop_order, line_segment, train_set) VALUES (?, ?, ?, ?, ?)",
+                   (trip_id, station_id, len(allStops) - 1, None, None))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

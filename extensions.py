@@ -21,6 +21,29 @@ def initDB():
                         verified BOOLEAN NOT NULL DEFAULT 0,
                         verifiedAt DATETIME
                     )''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS trips(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (user_id) REFERENCES users(id)
+                    )''')
+    cursor.execute("""CREATE TABLE IF NOT EXISTS stations (
+                        id          INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+                        stop_id     TEXT    NOT NULL UNIQUE,
+                        name        TEXT    NOT NULL,
+                        lines       TEXT    NOT NULL,
+                        platforms   TEXT    NOT NULL
+                    )""")
+    cursor.execute('''CREATE TABLE IF NOT EXISTS trip_stops(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+                        trip_id INTEGER NOT NULL,
+                        station_id INTEGER NOT NULL,
+                        stop_order INTEGER NOT NULL,
+                        line_segment TEXT,
+                        train_set TEXT,
+                        FOREIGN KEY (trip_id) REFERENCES trips(id),
+                        FOREIGN KEY (station_id) REFERENCES stations(id)
+                    )''')
     conn.commit()
     conn.close()
 
