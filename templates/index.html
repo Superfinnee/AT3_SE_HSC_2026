@@ -78,12 +78,17 @@
                         <h3>Journey on {{ journey[1] }}</h3>
                     </div>
                     <div class="journeyDetails" id="journeyDetails{{ loop.index }}">
-                        {% for num in range(journey[2]|length) %}
-                            <h3 class="stationName" id="stationName{{ loop.index }}">
-                                {{ journey[2][num] }}<img src="{{ url_for('static', filename='trainImages/' + 'Default' + '.png') }}" alt="{{ journey[4][num] }}" width="30" height="30">
-
-                            </h3>
-                        {% endfor %}
+                        <h3 class="stationName" id="stationName{{ loop.index }}">
+                            {% for num in range(journey[2]|length) %}
+                            
+                                {% if journey[4][num] != None%}
+                                    {{ journey[2][num] }}<img src="{{ url_for('static', filename='trainImages/' + journey[3][num] + '.png') }}" alt="{{ journey[4][num] }}" width="25%" height="auto">
+                                {% else %}
+                                    {{ journey[2][num] }}
+                                {% endif %}
+                            
+                            {% endfor %}
+                        </h3>
                     </div>
                 </div>
             {% endfor %}
