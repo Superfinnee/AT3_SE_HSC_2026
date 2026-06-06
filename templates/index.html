@@ -3,65 +3,100 @@
 {% block body %}
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!------------------ Journey Details Form -------------------------->
+<div class="journeyForm" id="journeyForm">
+    <form method="POST" action="{{ url_for('submitJourney') }}">
+        <h2>Submit Journey</h2>
+        <div id='stations'>
 
-<form method="POST" action="{{ url_for('submitJourney') }}">
-    <h2>Submit Journey</h2>
-    <div id='stations'>
-
-        <label for="startLocation">Start Station: &#x1F50E;</label>
-        <select id="startLocation" name="startLocation" required>
-            <option value=""></option>
-            {% for station in stations %}
-                {% if station != 'Select A Station' %}
+            <label for="startLocation">Start Station: &#x1F50E;</label>
+            <select id="startLocation" name="startLocation" required>
+                <option value="Select A Station" selected disabled></option>
+                {% for station in stations %}
                     <option value="{{ station }}">{{ station }}</option>
-                {% endif %}
-            {% endfor %}
-        </select><br><br>
-        <select id="startSetDropdown" name="startSetDropdown" required>
-        {% for train in trains %}
-            <option value="{{ train }}">{{ train }}</option>
-        {% endfor %}
-        </select><br><br>
-
-        <div id="middleStops"></div>
-
-        <label for="endLocation">End Station: &#x1F50E;</label>
-        <select id="endLocation" name="endLocation" required>
-            <option value=""></option>
-            {% for station in stations %}
-                {% if station != 'Select A Station' %}
-                    <option value="{{ station }}">{{ station }}</option>
-                {% endif %}
-            {% endfor %}
-        </select><br><br>
-
-    </div>
-
-    <button type="button" id="add-btn">Add Interchange</button><br><br>
-
-    
-    <div id="journey-results"></div><br>
-
-    <button type="submit" id="submitJourney">Submit</button>
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            $('#startLocation').select2({
-                placeholder: 'Select a station',
-                allowClear: false
-            });
-            $('#endLocation').select2({
-                placeholder: 'Select a station',
-                allowClear: false
-            });
-
+                {% endfor %}
+            </select><br><br>
             
-            $('#startLocation, #endLocation').on('change', updateJourney);
-            $('#startLocation, #endLocation').on('change', checkAddBtn);
-        });
-    </script>
-</form>
+            <select id="startSetDropdown" name="startSetDropdown" required>
+                <option value="Select A Train" selected disabled>Select a train</option>
+                {% for train in trains %}
+                    <option value="{{ train }}">{{ train }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <div id="middleStops"></div>
+
+            <label for="endLocation">End Station: &#x1F50E;</label>
+            <select id="endLocation" name="endLocation" required>
+                <option value="Select A Station" selected disabled></option>
+                {% for station in stations %}
+                    {% if station != 'Select A Station' %}
+                        <option value="{{ station }}">{{ station }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select><br><br>
+
+        </div>
+
+        <button type="button" id="add-btn">Add Interchange</button><br><br>
+
+        
+        <div id="journey-results"></div><br>
+
+        <button type="submit" id="submitJourney">Submit</button>
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+                $('#startLocation').select2({
+                    placeholder: 'Select a station',
+                    allowClear: false
+                });
+                $('#endLocation').select2({
+                    placeholder: 'Select a station',
+                    allowClear: false
+                });
+
+                
+                $('#startLocation, #endLocation').on('change', updateJourney);
+                $('#startLocation, #endLocation').on('change', checkAddBtn);
+            });
+        </script>
+    </form>
+</div>
+<!------------------ Journey Details Form End ---------------------->
+
+<div class="displayTripsOnPhone" id="displayTripsOnPhone">
+    <h2>Journey Results</h2>
+    <div id="journeyResults">
+        {% if journeys %}
+            {% for journey in journeys%}
+                <div class="individualJourneyCard" id="individualJourneyCard{{ loop.index }}">
+                    <div class="journeyHeader" id="journeyHeader{{ loop.index }}">
+                        <h3>Journey on {{ journey[1] }}</h3>
+                    </div>
+                    <div class="journeyDetails" id="journeyDetails{{ loop.index }}">
+                        {% for num in range(journey[2]|length) %}
+                            <h3 class="stationName" id="stationName{{ loop.index }}">
+                                {{ journey[2][num] }}<img src="{{ url_for('static', filename='trainImages/' + 'Default' + '.png') }}" alt="{{ journey[4][num] }}" width="30" height="30">
+
+                            </h3>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+
+
+        {% else %}
+
+            <p>No journey results to display. Start by adding a journey above!</p>
+        {% endif %}
+    </div>
+</div>
+
+
+
 {% endblock %}
