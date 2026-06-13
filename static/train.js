@@ -33,7 +33,7 @@ addStationButton.addEventListener("click", () => {
   const stations = ['Allawah', 'Arncliffe', 'Artarmon', 'Ashfield', 'Asquith', 'Auburn', 'Banksia', 'Bankstown', 'Bardwell Park', 'Beecroft', 'Berala', 'Berowra', 'Bella Vista', 'Beverly Hills', 'Bexley North', 'Birrong', 'Blacktown', 'Bondi Junction', 'Barangaroo', 'Burwood', 'Cabramatta', 'Campbelltown', 'Canley Vale', 'Caringbah', 'Carlton', 'Carramar', 'Casula', 'Castle Hill', 'Central', 'Chatswood', 'Cheltenham', 'Chester Hill', 'Cherrybrook', 'Circular Quay', 'Clarendon', 'Clyde', 'Como', 'Concord West', 'Cronulla', 'Croydon', 'Crows Nest', 'Denistone', 'Domestic Airport', 'Doonside', 'East Hills', 'East Richmond', 'Eastwood', 'Edgecliff', 'Edmondson Park', 'Emu Plains', 'Engadine', 'Epping', 'Erskineville', 'Fairfield', 'Flemington', 'Gadigal', 'Glenfield', 'Gordon', 'Granville', 'Green Square', 'Guildford', 'Gymea', 'Harris Park', 'Heathcote', 'Hills Showground', 'Holsworthy', 'Homebush', 'Hornsby', 'Hurstville', 'Ingleburn', 'International Airport', 'Jannali', 'Kellyville', 'Killara', 'Kings Cross', 'Kingsgrove', 'Kingswood', 'Kirrawee', 'Kogarah', 'Leightonfield', 'Leppington', 'Leumeah', 'Lewisham', 'Lidcombe', 'Lindfield', 'Liverpool', 'Loftus', 'Macarthur', 'Macdonaldtown', 'Macquarie Park', 'Macquarie Fields', 'Macquarie University', 'Marayong', 'Martin Place', 'Mascot', 'Meadowbank', 'Merrylands', 'Milsons Point', 'Minto', 'Miranda', 'Mortdale', 'Mount Colah', 'Mount Druitt', 'Mount Kuring-gai', 'Mulgrave', 'Museum', 'Narwee', 'Newtown', 'Normanhurst', 'North Strathfield', 'North Ryde', 'North Sydney', 'Norwest', 'Oatley', 'Olympic Park', 'Padstow', 'Panania', 'Parramatta', 'Pendle Hill', 'Pennant Hills', 'Penrith', 'Penshurst', 'Petersham', 'Pymble', 'Quakers Hill', 'Redfern', 'Regents Park', 'Revesby', 'Rhodes', 'Richmond', 'Riverstone', 'Riverwood', 'Rockdale', 'Rooty Hill', 'Roseville', 'Rouse Hill', 'Schofields', 'Sefton', 'Seven Hills', 'St James', 'St Leonards', 'St Marys', 'St Peters', 'Stanmore', 'Strathfield', 'Summer Hill', 'Sutherland', 'Sydenham', 'Tallawong', 'Tempe', 'Thornleigh', 'Toongabbie', 'Town Hall', 'Turramurra', 'Turrella', 'Victoria Cross', 'Villawood', 'Vineyard', 'Wahroonga', 'Waitara', 'Warrawee', 'Warwick Farm', 'Waterfall', 'Waterloo', 'Waverton', 'Wentworthville', 'Werrington', 'West Ryde', 'Westmead', 'Windsor', 'Wolli Creek', 'Wollstonecraft', 'Woolooware', 'Wynyard', 'Yagoona', 'Yennora']
 
   const blankStationOption = document.createElement("option")
-  blankStationOption.value = "Select A Station"
+  blankStationOption.value = ""
   blankStationOption.textContent = "Select a station"
   blankStationOption.selected = true
   blankStationOption.disabled = true
@@ -53,7 +53,7 @@ addStationButton.addEventListener("click", () => {
   const trainSets = ["Waratah Series 2 | B Set", "Waratah Series 1 | A Set", "Millennium | M Set", "Alstom Metropolis", "Mariyung | D Set", "Tangara | T Set", "Oscar | H Set", "K Set"]
 
   const blankTrainOption = document.createElement("option")
-  blankTrainOption.value = "Select A Train"
+  blankTrainOption.value = ""
   blankTrainOption.textContent = "Select a train"
   blankTrainOption.selected = true
   blankTrainOption.disabled = true
@@ -110,14 +110,6 @@ function calculateLineSegment(start, end) {
 
 
 
-function checkAddBtn() {
-  const start = document.getElementById("startLocation").value
-  const end = document.getElementById("endLocation").value
-  const addBtn = document.getElementById("add-btn")
-  const bothSelected = start && start !== "Select A Station" && end && end !== "Select A Station"
-  addBtn.disabled = !bothSelected
-}
-
 function updateJourney() {
 
   const start = document.getElementById("startLocation").value
@@ -133,7 +125,7 @@ function updateJourney() {
     const from = allStations[i]
     const to = allStations[i + 1]
 
-    if (!from || !to || from === "Select A Station" || to === "Select A Station") continue
+    if (!from || !to) continue
 
     const lines = calculateLineSegment(from, to)
     segments.push({ from, to, lines })
@@ -161,6 +153,14 @@ function updateJourney() {
     return `<p>${seg.from} → ${seg.to}: <strong>${lineList}</strong></p>${selectorHTML}`
   }).join("")
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.journeyDetails').forEach(el => {
+        if (el.scrollWidth > el.clientWidth) {
+            el.closest('.individualJourneyCard').classList.add('is-scrollable')
+        }
+    })
+})
 
 function askForLineChoice(lines) {
   const chooseLine = document.createElement("select")

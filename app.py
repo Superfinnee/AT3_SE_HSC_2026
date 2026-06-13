@@ -184,6 +184,7 @@ def index():
         return render_template('index.html', trains=trainSets, stations=stationsList, journeys=[])
     journeys = [list(row) for row in journeysTuple]
     currentID = journeys[0][0]
+    currentTime = journeys[0][1]
     formattedJourneys = []
     individualJourney = []
     stationList = []
@@ -192,7 +193,7 @@ def index():
     for journey in journeys:
         if currentID != journey[0]:
             individualJourney.append(currentID)
-            dateTimeObject = datetime.fromisoformat(journey[1])
+            dateTimeObject = datetime.fromisoformat(currentTime)
             readableTime = dateTimeObject.strftime("%A, %B %d, %I:%M %p")
             individualJourney.append(readableTime)
             individualJourney.append(stationList)
@@ -201,6 +202,7 @@ def index():
             formattedJourneys.append(individualJourney)
             individualJourney = []
             currentID = journey[0]
+            currentTime = journey[1]
             stationList = []
             lineList = []
             trainList = []
@@ -241,30 +243,34 @@ def submitJourney():
         flash("Please fill in all required fields.", "error")
         return redirect(url_for('index'))
 
-    if any(t == "Select A Train" for t in middleTrains) or firstTrain == "Select A Train":
+    if firstStop not in stationsList or lastStop not in stationsList:
+        flash("Please select valid stations.", "error")
+        return redirect(url_for('index'))
+
+    if any(not t for t in middleTrains) or not firstTrain:
         flash("Please select a train for each stop.", "error")
-        return redirect(url_for('index')) 
-    
+        return redirect(url_for('index'))
+
+    allStops = [firstStop] + middleStops + [lastStop]
+    allTrains = [firstTrain] + middleTrains
+
+    if len(lineSegment) != len(allStops) - 1:
+        flash("Please complete all line segment selections.", "error")
+        return redirect(url_for('index'))
+
     conn = sqlite3.connect(current_app.config['DATABASE'])
     cursor = conn.cursor()
 
     cursor.execute('INSERT INTO trips (user_id, created_at) VALUES (?, ?)', (session['userID'], datetime.now()))
     trip_id = cursor.lastrowid
 
-    allStops = [firstStop] + middleStops + [lastStop]
-    allTrains = [firstTrain] + middleTrains
-    
-    
-
     for i in range(len(allStops) - 1):
         currentStop = allStops[i]
-        nextStop = allStops[i + 1]
         currentTrain = allTrains[i] if i < len(allTrains) else None
 
         cursor.execute("SELECT id FROM stations WHERE name = ?", (currentStop,))
         row = cursor.fetchone()
         station_id = row[0] if row else None
-        print(station_id)
 
         cursor.execute("INSERT INTO trip_stops (trip_id, station_id, stop_order, line_segment, train_set) VALUES (?, ?, ?, ?, ?)",
                        (trip_id, station_id, i, lineSegment[i], currentTrain))

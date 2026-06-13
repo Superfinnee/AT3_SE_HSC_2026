@@ -25,7 +25,9 @@
     </div>
     <div class="buttons">
         <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <form method="POST" action="{{ url_for('logout') }}" style="display:inline;">
+            <button type="submit">Logout</button>
+        </form>
     </div>
 
     {% block body %}

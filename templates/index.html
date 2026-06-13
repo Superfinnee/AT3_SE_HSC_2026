@@ -11,7 +11,7 @@
 
             <label for="startLocation">Start Station: &#x1F50E;</label>
             <select id="startLocation" name="startLocation" required>
-                <option value="Select A Station" selected disabled></option>
+                <option value="" selected disabled></option>
                 {% for station in stations %}
                     <option value="{{ station }}">{{ station }}</option>
                 {% endfor %}
@@ -28,7 +28,7 @@
 
             <label for="endLocation">End Station: &#x1F50E;</label>
             <select id="endLocation" name="endLocation" required>
-                <option value="Select A Station" selected disabled></option>
+                <option value="" selected disabled></option>
                 {% for station in stations %}
                     {% if station != 'Select A Station' %}
                         <option value="{{ station }}">{{ station }}</option>
@@ -61,7 +61,6 @@
 
                 
                 $('#startLocation, #endLocation').on('change', updateJourney);
-                $('#startLocation, #endLocation').on('change', checkAddBtn);
             });
         </script>
     </form>
@@ -80,17 +79,19 @@
                     <div class="journeyDetails" id="journeyDetails{{ loop.index }}">
                         <h3 class="stationName" id="stationName{{ loop.index }}">
                             {% for num in range(journey[2]|length) %}
-                            
+
                                 {% if journey[4][num] != None%}
-                                    {{ journey[2][num] }}<img src="{{ url_for('static', filename='trainImages/' + journey[3][num] + '.png') }}" alt="{{ journey[4][num] }}" width="25%" height="auto">
+                                    {{ journey[2][num] }}<img src="{{ url_for('static', filename='trainImages/' + journey[3][num] + '.png') }}" alt="{{ journey[3][num] }}" class="connectorIcon" title="{{ journey[3][num] }}">
                                 {% else %}
                                     {{ journey[2][num] }}
                                 {% endif %}
-                            
+
                             {% endfor %}
                         </h3>
                     </div>
+                    <span class="scroll-hint">↔ Scroll to see more</span>
                 </div>
+                <br>
             {% endfor %}
             
 
