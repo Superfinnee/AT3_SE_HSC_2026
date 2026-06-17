@@ -20,12 +20,14 @@ function toggleConfirmPassword() {
 const addStationButton = document.getElementById("add-btn")
 addStationButton.addEventListener("click", () => {
   const container = document.getElementById("middleStops")
-  const wrapper = document.createElement("div")
-  wrapper.className = 'stop-row'
+  const stationWrapper = document.createElement("div")
+  stationWrapper.className = 'stationSet has-remove'
+  const trainWrapper = document.createElement("div")
+  trainWrapper.className = 'stationSet'
 
   const label = document.createElement("label")
-  label.textContent = "Interchange Station: \u{1F50E}"
-  wrapper.appendChild(label)
+  label.textContent = "Interchange \u{1F50E}"
+  stationWrapper.appendChild(label)
 
   const input = document.createElement("select")
   input.name = "middle"
@@ -68,22 +70,24 @@ addStationButton.addEventListener("click", () => {
 
   const removeButton = document.createElement("button")
   removeButton.type = "button"
-  removeButton.textContent = "X"
+  removeButton.className = "remove-btn"
+  removeButton.textContent = "✕"
+  removeButton.setAttribute("aria-label", "Remove interchange")
   removeButton.addEventListener("click", () => {
-    wrapper.remove()
-    // CHANGED: Recalculate after a stop is removed, since the journey has changed
+    stationWrapper.remove()
+    trainWrapper.remove()
     updateJourney()
   })
 
-  wrapper.appendChild(input)
-  wrapper.appendChild(removeButton)
-  wrapper.appendChild(document.createElement("br"))
-  wrapper.appendChild(document.createElement("br"))
-  wrapper.appendChild(select)
-  wrapper.appendChild(document.createElement("br"))
-  wrapper.appendChild(document.createElement("br"))
-  container.appendChild(wrapper)
+  const trainLabel = document.createElement("label")
+  trainLabel.textContent = "Train Line"
 
+  stationWrapper.appendChild(input)
+  stationWrapper.appendChild(removeButton)
+  trainWrapper.appendChild(trainLabel)
+  trainWrapper.appendChild(select)
+  container.appendChild(stationWrapper)
+  container.appendChild(trainWrapper)
 
   $(input).select2({ placeholder: 'Select a station', allowClear: false })
 

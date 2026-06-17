@@ -5,43 +5,49 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <!------------------ Journey Details Form -------------------------->
 <div class="journeyForm" id="journeyForm">
-    <form method="POST" action="{{ url_for('submitJourney') }}">
+    <form method="POST" action="{{ url_for('submitJourney') }}" id="stationsForm">
         <h2>Submit Journey</h2>
         <div id='stations'>
+            <div class="stationSet">
+                <label for="startLocation">Start Station &#x1F50E;</label>
+                <select id="startLocation" name="startLocation" required>
+                    <option value="" selected disabled></option>
+                    {% for station in stations %}
+                        <option value="{{ station }}">{{ station }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <label for="startLocation">Start Station: &#x1F50E;</label>
-            <select id="startLocation" name="startLocation" required>
-                <option value="" selected disabled></option>
-                {% for station in stations %}
-                    <option value="{{ station }}">{{ station }}</option>
-                {% endfor %}
-            </select><br><br>
-            
-            <select id="startSetDropdown" name="startSetDropdown" required>
-                <option value="Select A Train" selected disabled>Select a train</option>
-                {% for train in trains %}
-                    <option value="{{ train }}">{{ train }}</option>
-                {% endfor %}
-            </select><br><br>
+            <div class="stationSet">
+                <label for="startSetDropdown">Train Line</label>
+                <select id="startSetDropdown" name="startSetDropdown" required>
+                    <option value="" selected disabled>Select a train</option>
+                    {% for train in trains %}
+                        <option value="{{ train }}">{{ train }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" id="add-btn">+ Add Interchange</button>
+            </div>
 
             <div id="middleStops"></div>
 
-            <label for="endLocation">End Station: &#x1F50E;</label>
-            <select id="endLocation" name="endLocation" required>
-                <option value="" selected disabled></option>
-                {% for station in stations %}
-                    {% if station != 'Select A Station' %}
-                        <option value="{{ station }}">{{ station }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select><br><br>
-
+            <div class="stationSet">
+                <label for="endLocation">End Station &#x1F50E;</label>
+                <select id="endLocation" name="endLocation" required>
+                    <option value="" selected disabled></option>
+                    {% for station in stations %}
+                        {% if station != 'Select A Station' %}
+                            <option value="{{ station }}">{{ station }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <button type="button" id="add-btn">Add Interchange</button><br><br>
-
-        
-        <div id="journey-results"></div><br>
+        <div id="journey-results"></div>
 
         <button type="submit" id="submitJourney">Submit</button>
 

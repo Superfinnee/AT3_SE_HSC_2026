@@ -1,9 +1,4 @@
-
-/* ============================================================
-    Success and error notification banners rendered by layout.html.
-    Colour conventions follow established web standards (red=error, green=success)
-    ensuring immediate comprehension without needing to read the text (UX).
-   ============================================================ */
+/*Flash messages formatting*/
  
 .flash-messages {
     margin-bottom: 20px;
@@ -101,4 +96,192 @@
 
 .individualJourneyCard.is-scrollable .scroll-hint {
     display: block;
+}
+
+/* ===== Journey Input Card ===== */
+
+#tripsOnDesktop {
+    display: flex;
+}
+
+#tripsOnMobile {
+    display: none;
+}
+
+.journeyForm {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+}
+
+@media (max-width: 600px) {
+    #tripsOnDesktop {
+        display: none;
+    }
+
+    #tripsOnMobile {
+        display: flex;
+    }
+}
+
+#stationsForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 560px;
+}
+
+#stationsForm h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.4rem;
+    color: #111;
+}
+
+#stations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Label + input on the same row */
+.stationSet {
+    display: grid;
+    grid-template-columns: 145px 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Third column for remove button */
+.stationSet.has-remove {
+    grid-template-columns: 145px 1fr auto;
+}
+
+.stationSet label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+.stationSet select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    background-color: #fafafa;
+    color: #111;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stationSet select:focus {
+    outline: none;
+    border-color: #0055b3;
+    box-shadow: 0 0 0 3px rgba(0, 85, 179, 0.18);
+}
+
+/* Force select2 widgets to fill their grid cell */
+.stationSet .select2-container {
+    width: 100% !important;
+}
+
+/* ===== Button rows ===== */
+
+.btn-row {
+    width: 100%;
+}
+
+#add-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    border: 2px dashed #bbb;
+    border-radius: 6px;
+    background: transparent;
+    color: #555;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+#add-btn:hover,
+#add-btn:focus-visible {
+    border-color: #0055b3;
+    color: #0055b3;
+    outline: none;
+}
+
+.remove-btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    color: #c00;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.remove-btn:hover,
+.remove-btn:focus-visible {
+    background-color: #fff0f0;
+    border-color: #c00;
+    outline: none;
+}
+
+/* Journey segment preview (shown between form and submit) */
+#journey-results {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+#journey-results p {
+    margin: 0.25rem 0;
+}
+
+#journey-results select {
+    margin-top: 0.25rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    background-color: #fafafa;
+    color: #111;
+    cursor: pointer;
+}
+
+#submitJourney {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    background-color: #0055b3;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#submitJourney:hover,
+#submitJourney:focus-visible {
+    background-color: #003d87;
+    outline: 2px solid #003d87;
+    outline-offset: 2px;
+}
+
+body {
+    font-family: "Johnston100", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
