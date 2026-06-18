@@ -28,11 +28,11 @@
                 </select>
             </div>
 
+            <span id="middleStops"></span>
+
             <div class="btn-row">
                 <button type="button" id="add-btn">+ Add Interchange</button>
             </div>
-
-            <div id="middleStops"></div>
 
             <div class="stationSet">
                 <label for="endLocation">End Station &#x1F50E;</label>
@@ -73,8 +73,8 @@
 </div>
 <!------------------ Journey Details Form End ---------------------->
 
-<div class="displayTripsOnPhone" id="displayTripsOnPhone">
-    <h2>Journey Results</h2>
+<div class="displayTripsOnDesktop" id="displayTripsOnDesktop">
+    <h2 id="journeyResultsTitle">Journey Results</h2>
     <div id="journeyResults">
         {% if journeys %}
             {% for journey in journeys%}
