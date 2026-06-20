@@ -23,14 +23,16 @@
         {% endif %}
         {% endwith %}
     </div>
-    <div class="buttons">
-        <a href="{{ url_for('index') }}">Home</a>
-        <form method="POST" action="{{ url_for('logout') }}" style="display:inline;">
-            <button type="submit">Logout</button>
+    {% block buttons %}
+    <nav class="nav-bar">
+        <a class="nav-btn" href="{{ url_for('index') }}">Home</a>
+        <form method="POST" action="{{ url_for('logout') }}">
+            <button class="nav-btn" type="submit">Logout</button>
         </form>
-        <a href="{{ url_for('stats') }}">Stats</a>
-        <a href="{{ url_for('stations') }}">Stations</a>
-    </div>
+        <a class="nav-btn" href="{{ url_for('stats') }}">Stats</a>
+        <a class="nav-btn" href="{{ url_for('stations') }}">Stations</a>
+    </nav>
+    {% endblock %}
 
     {% block body %}
     {% endblock %}
