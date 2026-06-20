@@ -28,6 +28,8 @@
         <form method="POST" action="{{ url_for('logout') }}" style="display:inline;">
             <button type="submit">Logout</button>
         </form>
+        <a href="{{ url_for('stats') }}">Stats</a>
+        <a href="{{ url_for('stations') }}">Stations</a>
     </div>
 
     {% block body %}

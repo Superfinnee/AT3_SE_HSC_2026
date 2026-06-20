@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from config import Config
 from extensions import mail, initDB, verifyConfirmationToken, sendConfirmationEmail
-from trainStations import calculateLineSegment, addStations #If SQL Database is deleted, run this function to re-add stations from trainStations.py
+from trainStations import calculateLineSegment, addStations, lineStations  #addStations function will only add stations if they have been deleted.
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -22,6 +22,9 @@ trainSets = ["Waratah Series 2 | B Set", "Waratah Series 1 | A Set", "Millennium
 
 global stationsList
 stationsList = ['Allawah', 'Arncliffe', 'Artarmon', 'Ashfield', 'Asquith', 'Auburn', 'Banksia', 'Bankstown', 'Bardwell Park', 'Beecroft', 'Berala', 'Berowra', 'Bella Vista', 'Beverly Hills', 'Bexley North', 'Birrong', 'Blacktown', 'Bondi Junction', 'Barangaroo', 'Burwood', 'Cabramatta', 'Campbelltown', 'Canley Vale', 'Caringbah', 'Carlton', 'Carramar', 'Casula', 'Castle Hill', 'Central', 'Chatswood', 'Cheltenham', 'Chester Hill', 'Cherrybrook', 'Circular Quay', 'Clarendon', 'Clyde', 'Como', 'Concord West', 'Cronulla', 'Croydon', 'Crows Nest', 'Denistone', 'Domestic Airport', 'Doonside', 'East Hills', 'East Richmond', 'Eastwood', 'Edgecliff', 'Edmondson Park', 'Emu Plains', 'Engadine', 'Epping', 'Erskineville', 'Fairfield', 'Flemington', 'Gadigal', 'Glenfield', 'Gordon', 'Granville', 'Green Square', 'Guildford', 'Gymea', 'Harris Park', 'Heathcote', 'Hills Showground', 'Holsworthy', 'Homebush', 'Hornsby', 'Hurstville', 'Ingleburn', 'International Airport', 'Jannali', 'Kellyville', 'Killara', 'Kings Cross', 'Kingsgrove', 'Kingswood', 'Kirrawee', 'Kogarah', 'Leightonfield', 'Leppington', 'Leumeah', 'Lewisham', 'Lidcombe', 'Lindfield', 'Liverpool', 'Loftus', 'Macarthur', 'Macdonaldtown', 'Macquarie Park', 'Macquarie Fields', 'Macquarie University', 'Marayong', 'Martin Place', 'Mascot', 'Meadowbank', 'Merrylands', 'Milsons Point', 'Minto', 'Miranda', 'Mortdale', 'Mount Colah', 'Mount Druitt', 'Mount Kuring-gai', 'Mulgrave', 'Museum', 'Narwee', 'Newtown', 'Normanhurst', 'North Strathfield', 'North Ryde', 'North Sydney', 'Norwest', 'Oatley', 'Olympic Park', 'Padstow', 'Panania', 'Parramatta', 'Pendle Hill', 'Pennant Hills', 'Penrith', 'Penshurst', 'Petersham', 'Pymble', 'Quakers Hill', 'Redfern', 'Regents Park', 'Revesby', 'Rhodes', 'Richmond', 'Riverstone', 'Riverwood', 'Rockdale', 'Rooty Hill', 'Roseville', 'Rouse Hill', 'Schofields', 'Sefton', 'Seven Hills', 'St James', 'St Leonards', 'St Marys', 'St Peters', 'Stanmore', 'Strathfield', 'Summer Hill', 'Sutherland', 'Sydenham', 'Tallawong', 'Tempe', 'Thornleigh', 'Toongabbie', 'Town Hall', 'Turramurra', 'Turrella', 'Victoria Cross', 'Villawood', 'Vineyard', 'Wahroonga', 'Waitara', 'Warrawee', 'Warwick Farm', 'Waterfall', 'Waterloo', 'Waverton', 'Wentworthville', 'Werrington', 'West Ryde', 'Westmead', 'Windsor', 'Wolli Creek', 'Wollstonecraft', 'Woolooware', 'Wynyard', 'Yagoona', 'Yennora']
+
+global trainLines
+trainLines = ["M1", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9"]
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -285,6 +288,148 @@ def submitJourney():
     conn.close()
 
     return redirect(url_for('index'))
+
+'''1. Favourite train set 🚡
+2. Favourite stations 🚡
+3. Favourite Line 🚡
+4. Most travelled day of the week (percieved harder)
+5. Count number of trips created, compare with other users (anonymous) 🚡
+6. Bunch of leaderboard stuff
+7. total stations 🚡
+8. count for each line 🚡
+9. count for each train 🚡'''
+
+@app.route('/stats')
+def stats():
+    
+    global trainLines
+    
+    if 'userID' not in session:
+        redirect("/login")
+    
+    conn = sqlite3.connect(current_app.config['DATABASE'])
+    cursor = conn.cursor()
+    
+    
+    allStats = {}
+    cursor.execute('''SELECT st.name,
+                   COUNT(ts.station_id) AS st_count
+                   FROM stations AS st
+                   JOIN trip_stops AS ts
+                   ON ts.station_id = st.id
+                   JOIN trips AS tr 
+                   ON ts.trip_id = tr.id 
+                   WHERE tr.user_id = ?
+                   GROUP BY st.name
+                   ORDER BY st_count DESC
+                   LIMIT 1''', 
+                   (session['userID'],))
+    results = cursor.fetchone()
+    allStats['popStation'] = list(results) if results else []
+
+    
+    cursor.execute('''SELECT ts.train_set,
+                   COUNT(ts.train_set) as train_set_count
+                   FROM trip_stops AS ts
+                   JOIN trips AS tr
+                   ON ts.trip_id = tr.id
+                   WHERE tr.user_id = ?
+                   GROUP BY ts.train_set
+                   ORDER BY train_set_count DESC
+                   LIMIT 1
+                   ''', 
+                   (session['userID'],))
+    results = cursor.fetchone()
+    allStats['popTrain'] = list(results) if results else []
+
+    cursor.execute('''SELECT ts.line_segment,
+                   COUNT(ts.line_segment) AS line_count
+                   FROM trip_stops AS ts
+                   JOIN trips AS tr
+                   ON tr.id = ts.trip_id
+                   WHERE tr.user_id = ?
+                   GROUP BY ts.line_segment
+                   ORDER BY line_count DESC
+                   LIMIT 1
+                   ''',
+                   (session['userID'],))
+    results = cursor.fetchone()
+    allStats['popLine'] = list(results) if results else []
+
+    cursor.execute('''SELECT COUNT(station_id)
+                   FROM trip_stops AS ts
+                   JOIN trips AS tr
+                   ON tr.id = ts.trip_id
+                   WHERE tr.user_id = ?''',
+                   (session['userID'],))
+    results = cursor.fetchone()
+    allStats['totalStations'] = list(results) if results else []
+
+    cursor.execute('''SELECT line_segment, COUNT(line_segment) AS line_count
+                   FROM trip_stops AS ts
+                   JOIN trips AS tr
+                   ON tr.id = ts.trip_id
+                   WHERE tr.user_id = ?
+                   GROUP BY ts.line_segment
+                   ORDER BY line_count DESC''',
+                   (session["userID"],))
+    allStats['lineCounts'] = [list(row) for row in cursor.fetchall()]
+
+    cursor.execute('''SELECT train_set, COUNT(train_set) AS train_count
+                   FROM trip_stops AS ts
+                   JOIN trips AS tr
+                   ON tr.id = ts.trip_id
+                   WHERE tr.user_id = ?
+                   GROUP BY ts.train_set
+                   ORDER BY train_count DESC''',
+                   (session["userID"],))
+    allStats['trainCounts'] = [list(row) for row in cursor.fetchall()]
+    
+    cursor.execute('''SELECT rank, trip_count 
+                   FROM (
+                        SELECT user_id,
+                            COUNT(*) AS trip_count,
+                            RANK() OVER (ORDER BY COUNT(*) DESC) AS rank
+                        FROM trips
+                        GROUP BY user_id
+                        )
+                   WHERE user_id = ? ''', 
+                   (session['userID'],))
+    results = cursor.fetchone()
+    allStats["Leaderboard"] = [list(results) if results else []]
+    
+    print(allStats)
+    conn.close()
+    return render_template('statistics.html', allStats=allStats)
+
+@app.route("/stations")
+def stations():
+    global trainLines
+    
+    if 'userID' not in session:
+        redirect("/login")
+    
+    conn = sqlite3.connect(current_app.config['DATABASE'])
+    cursor = conn.cursor()
+    
+    cursor.execute('''SELECT DISTINCT st.name
+                   FROM stations AS st
+                   JOIN trip_stops AS ts
+                   ON ts.station_id = st.id
+                   JOIN trips AS tr
+                   ON ts.trip_id = tr.id
+                   WHERE tr.user_id = ?''',
+                   (session['userID'],))
+    stationsVisited = {row[0] for row in cursor.fetchall()}
+    
+    tracker = {line: [] for line in trainLines}
+    for line, stations in lineStations.items():
+        if line in tracker:
+            for station in stations:
+                tracker[line].append({'name': station, 'visited': station in stationsVisited})
+    print(tracker)
+    conn.close()
+    return render_template("stations.html", tracker=tracker, trainLines=trainLines)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="tracker-page">
+    <h1 class="tracker-title">Station Tracker</h1>
+    <p class="tracker-subtitle">Stations you've visited are highlighted. How many can you collect?</p>
+
+    <div class="tracker-grid">
+        {% for line in trainLines %}
+        <div class="tracker-col">
+            <div class="tracker-header line-{{ line }}">{{ line }}</div>
+            {% for station in tracker[line] %}
+            <div class="tracker-station {{ 'visited' if station.visited else 'unvisited' }}">
+                {{ station.name }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

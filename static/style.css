@@ -270,18 +270,24 @@ body {
 }
 
 .stationName {
-    margin: 0 auto;
+    margin: 0;
     white-space: nowrap;
-    flex-shrink: 0;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
     padding-bottom: 16px;
+    width: 100%;
+}
+
+.stationLabel {
+    flex: 0 0 auto;
+    padding: 0 4px;
 }
 
 /* Coloured connector blobs because my kindy teacher told me "show, don't tell" but I just infodumped */
 .connectorIcon {
+    flex-shrink: 0;
     width: auto;
     height: 1.6em;
 }
@@ -296,6 +302,88 @@ body {
 /* JavaScript adds .is-scrollable when the journey overflows its container */
 .individualJourneyCard.is-scrollable .scroll-hint {
     display: block;
+}
+
+
+/* =============================================
+   STATION TRACKER
+   /stations page — all lines as columns, visited = saturated, unvisited = grey
+   ============================================= */
+
+.tracker-page {
+    padding: 2rem 0.75rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.tracker-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 0.25rem;
+}
+
+.tracker-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 1.5rem;
+}
+
+.tracker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+    overflow-x: auto;
+}
+
+.tracker-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 100px;
+}
+
+.tracker-header {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 6px;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+}
+
+/* TfNSW line colours */
+.line-M1 { background-color: #009B77; }
+.line-T1 { background-color: #F99D1C; }
+.line-T2 { background-color: #0098CD; }
+.line-T3 { background-color: #F37021; }
+.line-T4 { background-color: #005AA3; }
+.line-T5 { background-color: #C4258F; }
+.line-T6 { background-color: #7C3E21; }
+.line-T7 { background-color: #6F818E; }
+.line-T8 { background-color: #00954C; }
+.line-T9 { background-color: #D11F2F; }
+
+.tracker-station {
+    font-size: 0.78rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tracker-station.visited {
+    color: #111;
+    font-weight: 600;
+    background-color: #e8f0fb;
+}
+
+.tracker-station.unvisited {
+    color: #bbb;
+    background-color: transparent;
 }
 
 
@@ -321,4 +409,5 @@ body {
     #displayTripsOnMobile {
         display: block;
     }
+
 }
