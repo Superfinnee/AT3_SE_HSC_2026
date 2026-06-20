@@ -5,8 +5,26 @@
 
 body {
     font-family: "Johnston100", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-image: url('/static/background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-color: #f0f0f0;
 }
 
+:root {
+    --M1: #009B77;
+    --T1: #F99D1C;
+    --T2: #0098CD;
+    --T3: #F37021;
+    --T4: #005AA3;
+    --T5: #C4258F;
+    --T6: #7C3E21;
+    --T7: #6F818E;
+    --T8: #00954C;
+    --T9: #D11F2F;
+}
 
 /* =============================================
    FLASH MESSAGES
@@ -355,16 +373,16 @@ body {
 }
 
 /* TfNSW line colours */
-.line-M1 { background-color: #009B77; }
-.line-T1 { background-color: #F99D1C; }
-.line-T2 { background-color: #0098CD; }
-.line-T3 { background-color: #F37021; }
-.line-T4 { background-color: #005AA3; }
-.line-T5 { background-color: #C4258F; }
-.line-T6 { background-color: #7C3E21; }
-.line-T7 { background-color: #6F818E; }
-.line-T8 { background-color: #00954C; }
-.line-T9 { background-color: #D11F2F; }
+.line-M1 { background-color: var(--M1); }
+.line-T1 { background-color: var(--T1); }
+.line-T2 { background-color: var(--T2); }
+.line-T3 { background-color: var(--T3); }
+.line-T4 { background-color: var(--T4); }
+.line-T5 { background-color: var(--T5); }
+.line-T6 { background-color: var(--T6); }
+.line-T7 { background-color: var(--T7); }
+.line-T8 { background-color: var(--T8); }
+.line-T9 { background-color: var(--T9); }
 
 .tracker-station {
     font-size: 0.78rem;
@@ -384,6 +402,236 @@ body {
 .tracker-station.unvisited {
     color: #bbb;
     background-color: transparent;
+}
+
+/* =============================================
+   STATISTICS
+   shows all the statistics of your data.
+   Each row is for either trips, stations, trains and lines
+   ============================================= */
+
+.stats-page-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111;
+    margin: 2rem 0 0.5rem;
+}
+
+.stats-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Each category (Journeys / Stations / Trains / Lines) gets its own row */
+.stat-row {
+    display: flex;
+    flex-direction: row;
+    gap: 1.25rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Individual stat cards — consistent with the rest of the site */
+.stat-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+    min-width: 180px;
+    max-width: 420px;
+}
+
+/* Stat label — small caps above the value */
+h2.stats {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #888;
+    margin: 1rem 0 0.2rem;
+}
+
+.stat-card h2.stats:first-child {
+    margin-top: 0;
+}
+
+/* Stat value — the headline number / name */
+span.data {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.15;
+}
+
+/* Leaderboard tables inside cards */
+.stat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+    text-align: left;
+}
+
+.stat-table th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #aaa;
+    padding: 0.35rem 0.6rem;
+    border-bottom: 2px solid #eee;
+}
+
+.stat-table td {
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid #f2f2f2;
+    color: #222;
+}
+
+.stat-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.stat-table tbody tr:hover {
+    background-color: #f7f9fc;
+}
+
+/* Line leaderboard — each row gets the line's brand colour */
+/* Line leaderboard — each row gets the line's brand colour, no hover change */
+.stat-table tr.line-row td { color: #fff; font-weight: 600; }
+.stat-table tr.line-M1 { background-color: var(--M1); }
+.stat-table tr.line-T1 { background-color: var(--T1); }
+.stat-table tr.line-T2 { background-color: var(--T2); }
+.stat-table tr.line-T3 { background-color: var(--T3); }
+.stat-table tr.line-T4 { background-color: var(--T4); }
+.stat-table tr.line-T5 { background-color: var(--T5); }
+.stat-table tr.line-T6 { background-color: var(--T6); }
+.stat-table tr.line-T7 { background-color: var(--T7); }
+.stat-table tr.line-T8 { background-color: var(--T8); }
+.stat-table tr.line-T9 { background-color: var(--T9); }
+#line-table tbody tr:hover { background-color: unset; filter: none; }
+
+
+/* =============================================
+   AUTH CARDS
+   Login and Register pages — centred card matching the journey form style
+   ============================================= */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+}
+
+.auth-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-title {
+    margin: 0 0 0.25rem;
+    font-size: 1.4rem;
+    color: #111;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.auth-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.auth-field input[type="text"],
+.auth-field input[type="email"],
+.auth-field input[type="password"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    background-color: #fafafa;
+    color: #111;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-field input[type="text"]:focus,
+.auth-field input[type="email"]:focus,
+.auth-field input[type="password"]:focus {
+    outline: none;
+    border-color: #0055b3;
+    box-shadow: 0 0 0 3px rgba(0, 85, 179, 0.18);
+}
+
+.show-password {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #555;
+    cursor: pointer;
+}
+
+.auth-submit {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    background-color: #0055b3;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-submit:hover,
+.auth-submit:focus-visible {
+    background-color: #003d87;
+    outline: 2px solid #003d87;
+    outline-offset: 2px;
+}
+
+.auth-switch {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+}
+
+.auth-switch a {
+    color: #0055b3;
+    text-decoration: none;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
 }
 
 
@@ -411,3 +659,4 @@ body {
     }
 
 }
+

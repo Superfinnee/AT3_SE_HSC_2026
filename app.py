@@ -305,15 +305,15 @@ def stats():
     global trainLines
     
     if 'userID' not in session:
-        redirect("/login")
+        flash("Please log in first.", "error")
+        return redirect(url_for('login'))
     
     conn = sqlite3.connect(current_app.config['DATABASE'])
     cursor = conn.cursor()
     
     
     allStats = {}
-    cursor.execute('''SELECT st.name,
-                   COUNT(ts.station_id) AS st_count
+    cursor.execute('''SELECT st.name, COUNT(ts.station_id) AS st_count
                    FROM stations AS st
                    JOIN trip_stops AS ts
                    ON ts.station_id = st.id
@@ -322,11 +322,9 @@ def stats():
                    WHERE tr.user_id = ?
                    GROUP BY st.name
                    ORDER BY st_count DESC
-                   LIMIT 1''', 
+                   LIMIT 10''', 
                    (session['userID'],))
-    results = cursor.fetchone()
-    allStats['popStation'] = list(results) if results else []
-
+    allStats['popStations'] = [list(row) for row in cursor.fetchall()]
     
     cursor.execute('''SELECT ts.train_set,
                    COUNT(ts.train_set) as train_set_count
@@ -385,6 +383,7 @@ def stats():
                    (session["userID"],))
     allStats['trainCounts'] = [list(row) for row in cursor.fetchall()]
     
+    #AI used for this query, was unable to figure it out myself. Selects your rank based on number of trips logged and finds your place against other users.
     cursor.execute('''SELECT rank, trip_count 
                    FROM (
                         SELECT user_id,
@@ -398,6 +397,8 @@ def stats():
     results = cursor.fetchone()
     allStats["Leaderboard"] = [list(results) if results else []]
     
+    
+    
     print(allStats)
     conn.close()
     return render_template('statistics.html', allStats=allStats)
@@ -407,7 +408,8 @@ def stations():
     global trainLines
     
     if 'userID' not in session:
-        redirect("/login")
+        flash("Please log in first.", "error")
+        return redirect(url_for('login'))
     
     conn = sqlite3.connect(current_app.config['DATABASE'])
     cursor = conn.cursor()
