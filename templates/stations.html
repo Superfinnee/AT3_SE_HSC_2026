@@ -2,9 +2,11 @@
 
 {% block body %}
 <div class="tracker-page">
-    <h1 class="tracker-title">Station Tracker</h1>
-    <p class="tracker-subtitle">Stations you've visited are highlighted. How many can you collect?</p>
-
+    <div class="title-description">
+        <h1 class="tracker-title">Your Station Keeper</h1>
+        <p class="tracker-subtitle">Stations you've visited are highlighted. How many can you collect?</p>
+    </div>
+<br>
     <div class="tracker-grid">
         {% for line in trainLines %}
         <div class="tracker-col">

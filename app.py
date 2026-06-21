@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash, current_app
+from flask import Flask, render_template, request, redirect, session, url_for, flash, current_app, abort
 import sqlite3
 from dotenv import load_dotenv
 load_dotenv()
@@ -8,15 +8,44 @@ from datetime import datetime
 from config import Config
 from extensions import mail, initDB, verifyConfirmationToken, sendConfirmationEmail
 from trainStations import calculateLineSegment, addStations, lineStations  #addStations function will only add stations if they have been deleted.
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from datetime import timedelta
+from flask_wtf.csrf import CSRFProtect
+import subprocess
+import hmac
+import hashlib
+import threading
+import requests
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
 mail.init_app(app)
+app.secret_key = os.environ.get('SECRET_KEY')
 
+#For Github and Python Anywhere integration
+WEBHOOK_SECRET = os.environ.get('WEBHOOK_SECRET', '').encode()
+PA_USERNAME = 'piccolif26'
+PA_API_TOKEN = os.environ.get('PA_API_TOKEN', '')
+PA_DOMAIN = "sydneystationkeeper-piccolif26.pythonanywhere.com"
+REPO_PATH = '/home/piccolif26/AT3_SE_HSC_2026'
+
+#Protecting my website from Cross Site Request Forgery
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+csrf = CSRFProtect(app) #I just imagine this function as a knite in front of a princess "I'll protect you!" in a very Brittish accent
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='Strict'
+)
+
+#Getting database and making sure the stations table is populated
 with app.app_context():
     initDB()
-    addStations()
+    addStations(app.config['DATABASE'])
     
+#initialising globals used in various functions
 global trainSets
 trainSets = ["Waratah Series 2 | B Set", "Waratah Series 1 | A Set", "Millennium | M Set", "Alstom Metropolis", "Mariyung | D Set", "Tangara | T Set", "Oscar | H Set", "K Set"]
 
@@ -25,6 +54,30 @@ stationsList = ['Allawah', 'Arncliffe', 'Artarmon', 'Ashfield', 'Asquith', 'Aubu
 
 global trainLines
 trainLines = ["M1", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9"]
+
+#Integrating 
+@app.route('/git_pull', methods=['POST'])
+@csrf.exempt #Exempt because Git Hub can't supply a token
+def git_pull():
+    # Verify GitHub's HMAC-SHA256 signature to authenticate the webhook sender
+    signature = request.headers.get('X-Hub-Signature-256') or ''
+    expected = 'sha256=' + hmac.new(WEBHOOK_SECRET, request.data, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(signature, expected):
+        abort(403)  # Reject requests with invalid signatures
+ 
+    def deploy():
+        # Pull latest code from the main branch
+        subprocess.run(['git', '-C', REPO_PATH, 'fetch', 'origin'], capture_output=True, text=True)
+        subprocess.run(['git', '-C', REPO_PATH, 'reset', '--hard', 'origin/main'], capture_output=True, text=True)
+        # Reload the PythonAnywhere web app via their REST API
+        requests.post(
+            f'https://www.pythonanywhere.com/api/v0/user/{PA_USERNAME}/webapps/{PA_DOMAIN}/reload/',
+            headers={'Authorization': f'Token {PA_API_TOKEN}'}
+        )
+ 
+    # Run deploy on a background thread — response must be sent before reload kills the worker
+    threading.Thread(target=deploy).start()
+    return 'OK', 200
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -181,7 +234,8 @@ def index():
                 ON trips.id = trip_stops.trip_id
                 JOIN stations
                 ON trip_stops.station_id = stations.id
-                ORDER BY trips.created_at DESC, trip_stops.stop_order ASC''')
+                WHERE trips.user_id = ?
+                ORDER BY trips.created_at DESC, trip_stops.stop_order ASC''', (session['userID'],))
     journeysTuple = cursor.fetchall()
     if not journeysTuple:
         return render_template('index.html', trains=trainSets, stations=stationsList, journeys=[])
@@ -218,7 +272,7 @@ def index():
             trainList.append(journey[5])
 
     individualJourney.append(currentID)
-    dateTimeObject = datetime.fromisoformat(journey[1])
+    dateTimeObject = datetime.fromisoformat(currentTime)
     readableTime = dateTimeObject.strftime("%A, %B %d, %I:%M %p")
     individualJourney.append(readableTime)
     individualJourney.append(stationList)
@@ -246,7 +300,7 @@ def submitJourney():
         flash("Please fill in all required fields.", "error")
         return redirect(url_for('index'))
 
-    if firstStop not in stationsList or lastStop not in stationsList:
+    if firstStop not in stationsList or lastStop not in stationsList or any(s not in stationsList for s in middleStops):
         flash("Please select valid stations.", "error")
         return redirect(url_for('index'))
 
@@ -263,29 +317,33 @@ def submitJourney():
 
     conn = sqlite3.connect(current_app.config['DATABASE'])
     cursor = conn.cursor()
+    try:
+        cursor.execute('INSERT INTO trips (user_id, created_at) VALUES (?, ?)', (session['userID'], datetime.now()))
+        trip_id = cursor.lastrowid
 
-    cursor.execute('INSERT INTO trips (user_id, created_at) VALUES (?, ?)', (session['userID'], datetime.now()))
-    trip_id = cursor.lastrowid
+        for i in range(len(allStops) - 1):
+            currentStop = allStops[i]
+            currentTrain = allTrains[i] if i < len(allTrains) else None
 
-    for i in range(len(allStops) - 1):
-        currentStop = allStops[i]
-        currentTrain = allTrains[i] if i < len(allTrains) else None
+            cursor.execute("SELECT id FROM stations WHERE name = ?", (currentStop,))
+            row = cursor.fetchone()
+            station_id = row[0] if row else None
 
-        cursor.execute("SELECT id FROM stations WHERE name = ?", (currentStop,))
+            cursor.execute("INSERT INTO trip_stops (trip_id, station_id, stop_order, line_segment, train_set) VALUES (?, ?, ?, ?, ?)",
+                           (trip_id, station_id, i, lineSegment[i], currentTrain))
+
+        cursor.execute("SELECT id FROM stations WHERE name = ?", (lastStop,))
         row = cursor.fetchone()
         station_id = row[0] if row else None
-
         cursor.execute("INSERT INTO trip_stops (trip_id, station_id, stop_order, line_segment, train_set) VALUES (?, ?, ?, ?, ?)",
-                       (trip_id, station_id, i, lineSegment[i], currentTrain))
-        
-    cursor.execute("SELECT id FROM stations WHERE name = ?", (lastStop,))
-    row = cursor.fetchone()
-    station_id = row[0] if row else None
-    cursor.execute("INSERT INTO trip_stops (trip_id, station_id, stop_order, line_segment, train_set) VALUES (?, ?, ?, ?, ?)",
-                   (trip_id, station_id, len(allStops) - 1, None, None))
+                       (trip_id, station_id, len(allStops) - 1, None, None))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+    except:
+        flash("Sorry, something went wrong when trying to save your trip. Please make sure your selections are correct, and stations connect on valid lines.", "error")
+        redirect(url_for('index'))
+    finally:
+        conn.close()
 
     return redirect(url_for('index'))
 
@@ -395,7 +453,7 @@ def stats():
                    WHERE user_id = ? ''', 
                    (session['userID'],))
     results = cursor.fetchone()
-    allStats["Leaderboard"] = [list(results) if results else []]
+    allStats["Leaderboard"] = [list(results)] if results else [[None, None]]
     
     
     

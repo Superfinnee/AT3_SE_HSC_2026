@@ -338,8 +338,8 @@ def calculateLineSegment(start, end):
         return None
     return segment_lines
 
-def addStations():
-    conn = sqlite3.connect("TfNSW.db")
+def addStations(db_path="TfNSW.db"):
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
 

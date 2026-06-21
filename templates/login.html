@@ -6,6 +6,7 @@
 
 <div class="auth-page">
     <form class="auth-card" method="POST" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <h2 class="auth-title">Login</h2>
 
         <div class="auth-field">

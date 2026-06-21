@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
+    <title>Sydney Station Keeper</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
 
@@ -26,11 +26,12 @@
     {% block buttons %}
     <nav class="nav-bar">
         <a class="nav-btn" href="{{ url_for('index') }}">Home</a>
-        <form method="POST" action="{{ url_for('logout') }}">
-            <button class="nav-btn" type="submit">Logout</button>
-        </form>
         <a class="nav-btn" href="{{ url_for('stats') }}">Stats</a>
         <a class="nav-btn" href="{{ url_for('stations') }}">Stations</a>
+        <form method="POST" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="nav-btn" type="submit">Logout</button>
+        </form>
     </nav>
     {% endblock %}
 

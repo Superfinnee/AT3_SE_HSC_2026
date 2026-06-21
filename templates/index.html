@@ -6,6 +6,7 @@
 <!------------------ Journey Details Form -------------------------->
 <div class="journeyForm" id="journeyForm">
     <form method="POST" action="{{ url_for('submitJourney') }}" id="stationsForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <h2>Submit Journey</h2>
         <div id='stations'>
             <div class="stationSet">
