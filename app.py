@@ -33,7 +33,7 @@ REPO_PATH = '/home/piccolif26/AT3_SE_HSC_2026'
 
 #Protecting my website from Cross Site Request Forgery
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
-csrf = CSRFProtect(app) #I just imagine this function as a knite in front of a princess "I'll protect you!" in a very Brittish accent
+csrf = CSRFProtect(app) #I just imagine this function as a knight in front of a princess "I'll protect you!" in a very Brittish accent
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SECURE=True,
