@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block displayUserName %}
+<p class="user-name">Check out your statistics, {{ name }}!</p>
+{% endblock %}
+
 {% block body %}
 
 <h1 class="stats-page-title">Your Statistics</h1>
@@ -19,9 +23,13 @@
     <div class="stat-row">
         <div class="stat-card" id="top-station">
             <h2 class="stats">Top Station</h2>
+            {% if allStats['popStations'] %}
             <span class="data">{{ allStats['popStations'][0][0] }}</span>
             <h2 class="stats">Times Visited</h2>
             <span class="data">{{ allStats['popStations'][0][1] }}</span>
+            {% else %}
+            <span class="data">—</span>
+            {% endif %}
         </div>
         <div class="stat-card" id="station-leaderboard">
             <h2 class="stats">Top 10 Stations</h2>
@@ -44,7 +52,7 @@
         </div>
         <div class="stat-card" id="total-stations">
             <h2 class="stats">Total Stations Visited</h2>
-            <span class="data">{{ allStats['totalStations'][0] }}</span>
+            <span class="data">{{ allStats['totalStations'][0] if allStats['totalStations'] else 0 }}</span>
         </div>
     </div>
 
@@ -52,9 +60,13 @@
     <div class="stat-row">
         <div class="stat-card" id="top-train">
             <h2 class="stats">Most Travelled Train</h2>
+            {% if allStats['popTrain'] %}
             <span class="data">{{ allStats['popTrain'][0] }}</span>
             <h2 class="stats">Times Travelled</h2>
             <span class="data">{{ allStats['popTrain'][1] }}</span>
+            {% else %}
+            <span class="data">—</span>
+            {% endif %}
         </div>
         <div class="stat-card" id="train-leaderboard">
             <h2 class="stats">Travelled Trains</h2>
@@ -81,9 +93,13 @@
     <div class="stat-row">
         <div class="stat-card" id="top-line">
             <h2 class="stats">Most Travelled Line</h2>
+            {% if allStats['popLine'] %}
             <span class="data">{{ allStats['popLine'][0] }}</span>
             <h2 class="stats">Times Travelled</h2>
             <span class="data">{{ allStats['popLine'][1] }}</span>
+            {% else %}
+            <span class="data">—</span>
+            {% endif %}
         </div>
         <div class="stat-card" id="line-leaderboard">
             <h2 class="stats">Travelled Lines</h2>

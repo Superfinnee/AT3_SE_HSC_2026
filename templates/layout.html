@@ -28,9 +28,13 @@
         <a class="nav-btn" href="{{ url_for('index') }}">Home</a>
         <a class="nav-btn" href="{{ url_for('stats') }}">Stats</a>
         <a class="nav-btn" href="{{ url_for('stations') }}">Stations</a>
+        {% if status == "admin" %}
+            <a class="nav-btn" href="{{ url_for('manageUsers') }}">Admin</a>
+        {% endif %}
+        {% block displayUserName %}{% endblock %}
         <form method="POST" action="{{ url_for('logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="nav-btn" type="submit">Logout</button>
+            <button id="logout-btn" class="nav-btn" type="submit">Logout</button>
         </form>
     </nav>
     {% endblock %}

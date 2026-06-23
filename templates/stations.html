@@ -1,5 +1,9 @@
 {% extends 'layout.html' %}
 
+{% block displayUserName %}
+<p class="user-name">Getting around {{ name }}?</p>
+{% endblock %}
+
 {% block body %}
 <div class="tracker-page">
     <div class="title-description">

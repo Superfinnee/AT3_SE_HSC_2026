@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block displayUserName %}
+<p class="user-name">Time for a trip {{ name }}?</p>
+{% endblock %}
+
 {% block body %}
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -88,7 +92,7 @@
                             {% for num in range(journey[2]|length) %}
                                 <span class="stationLabel">{{ journey[2][num] }}</span>
                                 {% if journey[4][num] != None %}
-                                    <img src="{{ url_for('static', filename='trainImages/' + journey[3][num] + '.png') }}" alt="{{ journey[3][num] }}" class="connectorIcon" title="{{ journey[3][num] }}">
+                                    <img src="{{ url_for('static', filename='trainImages/' + journey[3][num] + '-' + trainImages[journey[4][num]] + '.jpg') }}" alt="{{ journey[3][num] }} and {{ journey[4][num] }}" class="connectorIcon" title="{{ journey[3][num] }}">
                                 {% endif %}
                             {% endfor %}
                         </h3>
@@ -102,7 +106,36 @@
 
         {% else %}
 
-            <p>No journey results to display. Start by adding a journey above!</p>
+            <p class="no-journey-results">No journey results to display. Start by adding a journey above!</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="displayTripsOnMobile" id="displayTripsOnMobile">
+    <h2 id="journeyResultsTitleMobile">Journey Results</h2>
+    <div id="journeyResultsMobile">
+        {% if journeys %}
+            {% for journey in journeys %}
+                <div class="mobileJourneyCard">
+                    <div class="journeyHeader">
+                        <h3>Journey on {{ journey[1] }}</h3>
+                    </div>
+                    <div class="mobileJourneyStops">
+                        {% for num in range(journey[2]|length) %}
+                            <div class="mobileStationLabel">{{ journey[2][num] }}</div>
+                            {% if journey[4][num] != None %}
+                                <div class="mobileConnector">
+                                    <img src="{{ url_for('static', filename='trainImages/' + journey[3][num] + '-' + trainImages[journey[4][num]] + '.jpg') }}"
+                                         alt="{{ journey[3][num] }} to {{ journey[2][num+1] }}"
+                                         class="mobileConnectorIcon">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-journey-results">No journey results to display. Start by adding a journey above!</p>
         {% endif %}
     </div>
 </div>

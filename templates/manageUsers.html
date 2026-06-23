@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<!-- Don't mind that this file is called manageUsers.html. 
+This is the admin page because I realised too late to change the name of the file. -->
+
+
+<div class="manage-users-wrapper">
+
+    <div class="stat-card manage-users-card">
+        <h1 class="stats-page-title">Admin Panel</h1><br>
+        <table class="stat-table">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Toggle Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <!--{# Display-only user fields — passwords are excluded from this query (CONFIDENTIALITY) #}-->
+                    <td>{{ user[0] }}</td>   <!--{# fName #}-->
+                    <td>{{ user[1] }}</td>   <!--{# lName #}-->
+                    <td>{{ user[2] }}</td>   <!--{# email #}-->
+                    <td>{{ user[3] }}</td>   <!--{# username #}-->
+                    <td>{{ user[4] }}</td>   <!--{# status: 'user' or 'admin' #}-->
+                    <td>
+                        <!--{# Context-aware button label:
+                            - If the user is already an admin, offer 'Revoke Admin'
+                            - If the user is a regular user, offer 'Make Admin'
+                            This prevents confusion about what action will be taken (UX). #}-->
+                        {% if user[4] == 'admin' %}
+                            <form action="{{ url_for('toggleAdmin') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <!--{# username passed as hidden field — toggleAdmin() uses this to
+                                    identify which account to update in the database #}-->
+                                <input type="hidden" name="username" value="{{ user[3] }}">
+                                <button class="admin-btn revoke" type="submit">Revoke Admin</button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('toggleAdmin') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="username" value="{{ user[3] }}">
+                                <button class="admin-btn grant" type="submit">Make Admin</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="download-and-delete">
+        <div class="download-log-card stat-card">
+            <h2 class="stats">Download Action Log</h2>
+            <p class="auth-switch">Download a log of all admin actions performed on user accounts.</p><br>
+            <form action="{{ url_for('downloadActionLog') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="auth-submit" type="submit">Download Log</button>
+            </form>
+        </div>
+
+        <!--{# ---- SUPER ADMIN CONTROLS ----
+        Only rendered for the SuperAdmin account ('SuperFinnee').
+        This provides a higher privilege tier than regular admins — only SuperFinnee
+        can permanently delete user accounts (TIERED RBAC / AUTHORISATION). #}-->
+        {% if username == "SuperFinnee" %}
+        <div class="auth-card super-admin-card">
+            <h2 class="auth-title">Super Admin Controls</h2>
+
+            <!--{ User deletion — permanently removes a user account from the database.
+            This is irreversible, which is why it is restricted to SuperAdmin only.
+            The warning text in the form communicates the severity to the operator. }-->
+            <form action="{{ url_for('deleteUser') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="auth-field">
+                    <label for="deleteUser">Delete User</label>
+                    <p class="auth-switch">Enter the username of the user you want to delete. This action is irreversible.</p>
+                    <input id="deleteUser" name="username" placeholder="Username" type="text" required>
+                </div>
+                <button class="auth-submit danger-btn" type="submit" onclick="return confirm('Are you sure you want to delete this user? This action is irreversible.')">Delete User</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

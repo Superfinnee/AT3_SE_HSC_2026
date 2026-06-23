@@ -10,11 +10,27 @@
     background: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border-radius: 12px;
+    position: relative;
+    align-items: center;
 }
 
 .nav-bar form {
     margin: 0 0 0 auto;
     padding: 0;
+}
+
+.user-name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0.45rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0055b3;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .nav-btn {
@@ -291,6 +307,19 @@ body {
    Where the user can see all of their beloved trips.
    ============================================= */
 
+#journeyResultsTitle {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111;
+    margin: 1.5rem auto 0.5rem;
+    max-width: 90%;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+    padding: 1rem 2rem;
+}
+
 #journeyResults {
     display: flex;
     flex-direction: column;
@@ -298,6 +327,17 @@ body {
     padding: 20px;
     max-width: 90%;
     margin: 0 auto;
+}
+
+.no-journey-results {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
 }
 
 .individualJourneyCard {
@@ -588,6 +628,100 @@ span.data {
 
 
 /* =============================================
+   MANAGE USERS
+   Admin page for viewing and toggling user accounts
+   ============================================= */
+
+.manage-users-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: stretch;
+}
+
+.download-and-delete {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.manage-users-card {
+    max-width: 100%;
+    text-align: left;
+    align-items: stretch;
+    overflow-x: auto;
+}
+
+.manage-users-card .stat-table {
+    width: 100%;
+}
+
+/* Inline forms in table cells shouldn't add extra spacing */
+.manage-users-card td form {
+    margin: 0;
+}
+
+.admin-btn {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.82rem;
+    font-family: inherit;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.admin-btn.grant {
+    background-color: #0055b3;
+    color: #fff;
+}
+
+.admin-btn.grant:hover,
+.admin-btn.grant:focus-visible {
+    background-color: #003d87;
+    outline: none;
+}
+
+.admin-btn.revoke {
+    background-color: #c0392b;
+    color: #fff;
+}
+
+.admin-btn.revoke:hover,
+.admin-btn.revoke:focus-visible {
+    background-color: #a93226;
+    outline: none;
+}
+
+.super-admin-card {
+    max-width: 480px;
+}
+
+/* Form inside auth-card needs the same flex column layout as the card itself */
+.super-admin-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.danger-btn {
+    background-color: #c0392b;
+}
+
+.danger-btn:hover,
+.danger-btn:focus-visible {
+    background-color: #a93226;
+    outline-color: #a93226;
+}
+
+
+/* =============================================
    AUTH CARDS
    Login and Register pages — centred card matching the journey form style
    ============================================= */
@@ -705,22 +839,112 @@ span.data {
    and show the mobile-friendly version instead.
    ============================================= */
 
-#displayTripsOnDesktop {
+.displayTripsOnDesktop {
     display: block;
 }
 
-#displayTripsOnMobile {
+.displayTripsOnMobile {
     display: none;
 }
 
+/* Mobile Journey Results */
+
+#journeyResultsTitleMobile {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111;
+    margin: 1.5rem auto 0.5rem;
+    max-width: 90%;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+    padding: 1rem 2rem;
+}
+
+#journeyResultsMobile {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+.mobileJourneyCard {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobileJourneyStops {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.mobileStationLabel {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111;
+    text-align: center;
+    padding: 4px 8px;
+}
+
+.mobileConnector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Rotated 90° clockwise. Layout box stays 80×24px so margin compensates:
+   visual height after rotation = 80px, layout height = 24px → add (80-24)/2 = 28px top/bottom */
+.mobileConnectorIcon {
+    width: 80px;
+    height: 24px;
+    object-fit: contain;
+    transform: rotate(90deg);
+    margin: 28px 0;
+}
+
+@media (max-width: 850px) {
+    .user-name {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .tracker-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .tracker-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .tracker-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 600px) {
-    #displayTripsOnDesktop {
+    .displayTripsOnDesktop {
         display: none;
     }
 
-    #displayTripsOnMobile {
+    .displayTripsOnMobile {
         display: block;
     }
 
 }
-

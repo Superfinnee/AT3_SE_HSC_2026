@@ -52,7 +52,7 @@ addStationButton.addEventListener("click", () => {
   const select = document.createElement("select")
   select.name = "middleSetDropdown"
   select.required = true
-  const trainSets = ["Waratah Series 2 | B Set", "Waratah Series 1 | A Set", "Millennium | M Set", "Alstom Metropolis", "Mariyung | D Set", "Tangara | T Set", "Oscar | H Set", "K Set"]
+  const trainSets = ["Waratah Series 2 | B Set", "Waratah Series 1 | A Set", "Millennium | M Set", "Alstom Metropolis", "Mariyung | D Set", "Tangara | T Set", "Oscar | H Set"]
 
   const blankTrainOption = document.createElement("option")
   blankTrainOption.value = ""
@@ -158,13 +158,17 @@ function updateJourney() {
   }).join("")
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function checkScrollable() {
     document.querySelectorAll('.journeyDetails').forEach(el => {
         if (el.scrollWidth > el.clientWidth) {
             el.closest('.individualJourneyCard').classList.add('is-scrollable')
         }
     })
-})
+}
+
+// Run at DOM ready for text-only journeys, then again after images load for accurate widths
+document.addEventListener('DOMContentLoaded', checkScrollable)
+window.addEventListener('load', checkScrollable)
 
 function askForLineChoice(lines) {
   const chooseLine = document.createElement("select")

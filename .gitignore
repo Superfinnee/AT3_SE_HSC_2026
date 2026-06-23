@@ -1,7 +1,6 @@
 .env
 .vscode/
 TfNSW.db
-__pycache__/config.cpython-313.pyc
-__pycache__/extensions.cpython-313.pyc
-__pycache__/trainStations.cpython-313.pyc
+__pycache__/
+*.pyc
 test.py

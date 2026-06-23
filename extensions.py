@@ -44,6 +44,13 @@ def initDB():
                         FOREIGN KEY (trip_id) REFERENCES trips(id),
                         FOREIGN KEY (station_id) REFERENCES stations(id)
                     )''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS action_log(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+                        action TEXT NOT NULL,
+                        table_name TEXT NOT NULL,
+                        id_in_table INTEGER NOT NULL,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                    )''')
     conn.commit()
     conn.close()
 
