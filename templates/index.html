@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block displayUserName %}
-<p class="user-name">Time for a trip {{ name }}?</p>
+<p class="user-name">Time for a trip, {{ name }}?</p>
 {% endblock %}
 
 {% block body %}
@@ -32,13 +32,14 @@
                     {% endfor %}
                 </select>
             </div>
-
+            <!--Middle stops added dynamically by JavaScript-->
             <span id="middleStops"></span>
 
             <div class="btn-row">
                 <button type="button" id="add-btn">+ Add Interchange</button>
             </div>
 
+            <!--End stations is by itself because there is no line nor train after you get off-->
             <div class="stationSet">
                 <label for="endLocation">End Station &#x1F50E;</label>
                 <select id="endLocation" name="endLocation" required>
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <div id="journey-results"></div>
+        <div id="journey-results"></div>{#<!--I have only just realised (1:13AM on Wednesday) that this id is almost equivalent to one below lol. Didn't notice that, lucky AI did when it was proofing my code-->#}
 
         <button type="submit" id="submitJourney">Submit</button>
 
@@ -60,6 +61,8 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <script>
+            {# Initialise Select2 on the static start/end dropdowns so they're searchable.
+               With 170+ stations, a regular <select> is basically unusable without search. #}
             $(document).ready(function() {
                 $('#startLocation').select2({
                     placeholder: 'Select a station',
@@ -70,7 +73,7 @@
                     allowClear: false
                 });
 
-                
+
                 $('#startLocation, #endLocation').on('change', updateJourney);
             });
         </script>
@@ -78,6 +81,8 @@
 </div>
 <!------------------ Journey Details Form End ---------------------->
 
+<!--{# Two separate journey layouts — CSS hides one based on viewport width (see the @media block in style.css).
+   Desktop uses horizontal scroll cards; mobile stacks the stops vertically with rotated connector images. #}-->
 <div class="displayTripsOnDesktop" id="displayTripsOnDesktop">
     <h2 id="journeyResultsTitle">Journey Results</h2>
     <div id="journeyResults">
@@ -88,6 +93,10 @@
                         <h3>Journey on {{ journey[1] }}</h3>
                     </div>
                     <div class="journeyDetails" id="journeyDetails{{ loop.index }}">
+                        <!--{# journey[2] = station names, journey[3] = line segments, journey[4] = train sets.
+                           All three lists are the same length and in the same order, so index num
+                           gives you the station, the line out of it, and the train for that leg.
+                           journey[4][num] is None for the last stop — no outgoing connector there. #}-->
                         <h3 class="stationName" id="stationName{{ loop.index }}">
                             {% for num in range(journey[2]|length) %}
                                 <span class="stationLabel">{{ journey[2][num] }}</span>
@@ -110,7 +119,7 @@
         {% endif %}
     </div>
 </div>
-
+<!--{# This section is for displaying journey results on mobile devices. Vertical rather than horizontal layout. #}-->
 <div class="displayTripsOnMobile" id="displayTripsOnMobile">
     <h2 id="journeyResultsTitleMobile">Journey Results</h2>
     <div id="journeyResultsMobile">

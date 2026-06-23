@@ -94,13 +94,16 @@ def journeyTupleToList(journeysTuple):
     journeys = [list(row) for row in journeysTuple]
     currentID = journeys[0][0]
     currentTime = journeys[0][1]
+    #Setting up data structures
     formattedJourneys = []
     individualJourney = []
     stationList = []
     lineList = []
     trainList = []
+    #Iterating through the journeys tuple, which is ordered by trip ID and stop order, to convert it into a list of journeys, where each journey contains a list of stations, line segments and train sets for that journey. 
+    #This structure is easier to work with in Jinja when displaying the journeys on the front end.
     for journey in journeys:
-        if currentID != journey[0]:
+        if currentID != journey[0]: #If the trip ID changes, we know we are on a new journey, so we need to append the previous journey to the list and reset our data structures for the new journey.
             individualJourney.append(currentID)
             dateTimeObject = datetime.fromisoformat(currentTime)
             readableTime = dateTimeObject.strftime("%A, %B %d, %I:%M %p")
@@ -109,31 +112,39 @@ def journeyTupleToList(journeysTuple):
             individualJourney.append(lineList)
             individualJourney.append(trainList)
             formattedJourneys.append(individualJourney)
+            #Resetting data structures for the new journey
             individualJourney = []
             currentID = journey[0]
             currentTime = journey[1]
             stationList = []
             lineList = []
             trainList = []
+            #Appending the first station, line segment and train set for the new journey
             stationList.append(journey[3])
             lineList.append(journey[4])
             trainList.append(journey[5])
         else:
+            #If the trip ID is the same, we are on the same journey, so we just need to append the station, line segment and train set to the current journey's data structures.
             stationList.append(journey[3])
             lineList.append(journey[4])
             trainList.append(journey[5])
 
+    #Appending the final journey after the loop, since the loop only appends when it detects a change in trip ID, so the final journey won't be appended within the loop.
     individualJourney.append(currentID)
     dateTimeObject = datetime.fromisoformat(currentTime)
     readableTime = dateTimeObject.strftime("%A, %B %d, %I:%M %p")
+    
+    #The final iteration is constructed here, appending the time, station list, line list and train list to the individual journey.
     individualJourney.append(readableTime)
     individualJourney.append(stationList)
     individualJourney.append(lineList)
     individualJourney.append(trainList)
+    
+    #Finally, appending the final journey to the list of formatted journeys.
     formattedJourneys.append(individualJourney)
     return formattedJourneys
 
-#Integrating 
+#Integrating GITHUB to python anywhere deployment, so that when I push code to Github, it automatically updates the website without me having to manually log in and pull the changes, making development and iteration much smoother.
 @app.route('/git_pull', methods=['POST'])
 @csrf.exempt #Exempt because Git Hub can't supply a token
 def git_pull():
@@ -447,6 +458,7 @@ def stats():
     
     
     allStats = {}
+    #Users most popular Station
     cursor.execute('''SELECT st.name, COUNT(ts.station_id) AS st_count
                    FROM stations AS st
                    JOIN trip_stops AS ts
@@ -460,6 +472,7 @@ def stats():
                    (session['userID'],))
     allStats['popStations'] = [list(row) for row in cursor.fetchall()]
     
+    #Users most popular train set
     cursor.execute('''SELECT ts.train_set,
                    COUNT(ts.train_set) as train_set_count
                    FROM trip_stops AS ts
@@ -474,6 +487,7 @@ def stats():
     results = cursor.fetchone()
     allStats['popTrain'] = list(results) if results else []
 
+    #Users most popular line segment
     cursor.execute('''SELECT ts.line_segment,
                    COUNT(ts.line_segment) AS line_count
                    FROM trip_stops AS ts
@@ -488,6 +502,7 @@ def stats():
     results = cursor.fetchone()
     allStats['popLine'] = list(results) if results else []
 
+    #Total stations visited by the user across all their trips
     cursor.execute('''SELECT COUNT(station_id)
                    FROM trip_stops AS ts
                    JOIN trips AS tr
@@ -497,6 +512,7 @@ def stats():
     results = cursor.fetchone()
     allStats['totalStations'] = list(results) if results else []
 
+    #Total line segments travelled by the user across all their trips
     cursor.execute('''SELECT line_segment, COUNT(line_segment) AS line_count
                    FROM trip_stops AS ts
                    JOIN trips AS tr
@@ -507,6 +523,7 @@ def stats():
                    (session["userID"],))
     allStats['lineCounts'] = [list(row) for row in cursor.fetchall()]
 
+    #Total train sets travelled by the user across all their trips
     cursor.execute('''SELECT train_set, COUNT(train_set) AS train_count
                    FROM trip_stops AS ts
                    JOIN trips AS tr
@@ -539,10 +556,6 @@ def stats():
 def stations():
     global trainLines
     
-    if 'userID' not in session:
-        flash("Please log in first.", "error")
-        return redirect(url_for('login'))
-    
     conn = sqlite3.connect(current_app.config['DATABASE'])
     cursor = conn.cursor()
     
@@ -556,14 +569,21 @@ def stations():
                    (session['userID'],))
     stationsVisited = {row[0] for row in cursor.fetchall()}
     
+    #This section of code creates a data structure to easily display the stations the user has visited on each line, and which they haven't visited. 
+    # It iterates through each line and station, checking if the station has been visited by the user, and appending it to the tracker dictionary with a visited status. 
+    # This allows for easy display in Jinja to show which stations on each line the user has visited.
     tracker = {line: [] for line in trainLines}
     for line, stations in lineStations.items():
         if line in tracker:
             for station in stations:
                 tracker[line].append({'name': station, 'visited': station in stationsVisited})
     conn.close()
+    print(stationsVisited)
     return render_template("stations.html", name=session['fName'], tracker=tracker, trainLines=trainLines, status=session["status"])
 
+#The following routes are for user management, allowing admins to view all users, toggle their admin status, and delete users. 
+#These routes are protected by the @admin_required decorator, ensuring only users with admin privileges can access them. 
+#Additionally, there are safeguards in place to protect the SuperAdmin account from being modified or deleted by other admins, enforcing a strict hierarchy of privileges (AUTHORISATION).
 @app.route("/manageUsers", methods=["GET"])
 @login_required
 @admin_required
@@ -577,7 +597,7 @@ def manageUsers():
     conn = sqlite3.connect(current_app.config['DATABASE'])
     cursor = conn.cursor()
 
-    # Fetch display fields only — password hashes are deliberately excluded (CONFIDENTIALITY)
+    # Fetch display fields only — password hashes are deliberately excluded
     cursor.execute("SELECT fname, lname, email, username, status FROM users")
     users = cursor.fetchall()
 
@@ -593,6 +613,7 @@ def manageUsers():
         username=userStatus[1] if userStatus else None
     )
 
+#This route allows admins to toggle a user's role between 'user' and 'admin'.
 @app.route("/toggleAdmin", methods=["POST"])
 @login_required
 @admin_required
@@ -634,6 +655,8 @@ def toggleAdmin():
     conn.close()
     return redirect('/manageUsers')
 
+#This route allows the SuperAdmin to permanently delete a user account from the database. 
+# It includes safeguards to prevent deletion of the SuperAdmin account and revokes admin privileges from any user attempting to delete the SuperAdmin, enforcing strict AUTHORISATION controls.
 @app.route("/deleteUser", methods=["POST"])
 @login_required
 @admin_required
@@ -668,6 +691,8 @@ def deleteUser():
     flash(f'User {username} has been deleted.', 'success')
     return redirect('/manageUsers')
 
+#This route allows admins to download the action log as a CSV file, providing transparency and accountability for all actions recorded in the system. 
+#The log includes details such as the action performed, the table affected, the ID of the record involved, and a timestamp, allowing admins to review historical actions and monitor for any suspicious activity.
 @app.route("/downloadActionLog", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -683,11 +708,11 @@ def downloadActionLog():
     logs = cursor.fetchall()
     conn.close()
 
-    # Convert logs to CSV format
+    # Converting logs to CSV format for readability in excel
     csv_data = "ID,Action,Table Name,ID in Table,Timestamp\n"
     csv_data += "\n".join([f"{log[0]},{log[1]},{log[2]},{log[3]},{log[4]}" for log in logs])
 
-    # Send CSV as a downloadable file
+    # Generating CSV as a downloadable file
     return (
         csv_data,
         200,
@@ -698,4 +723,4 @@ def downloadActionLog():
     )
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

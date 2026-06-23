@@ -74,9 +74,9 @@ This is the admin page because I realised too late to change the name of the fil
         <div class="auth-card super-admin-card">
             <h2 class="auth-title">Super Admin Controls</h2>
 
-            <!--{ User deletion — permanently removes a user account from the database.
+            <!--{# User deletion — permanently removes a user account from the database.
             This is irreversible, which is why it is restricted to SuperAdmin only.
-            The warning text in the form communicates the severity to the operator. }-->
+            The warning text in the form communicates the severity to the operator. #}-->
             <form action="{{ url_for('deleteUser') }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="auth-field">

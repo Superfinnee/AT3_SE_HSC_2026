@@ -39,7 +39,7 @@
                 </thead>
                 <tbody>
                     {% for list in allStats['popStations'] %}
-                        {% if list[0] %}
+                        {% if list[0] %} <!-- guard against None rows — last stop in a trip has no station name -->
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ list[0] }}</td>
@@ -109,8 +109,8 @@
                 </thead>
                 <tbody>
                     {% for list in allStats['lineCounts'] %}
-                        {% if list[0] %}
-                        <tr class="line-row line-{{ list[0] }}">
+                        {% if list[0] %} <!-- last stop has no line segment, so skip None rows -->
+                        <tr class="line-row line-{{ list[0] }}"> <!-- dynamic class maps to the TfNSW brand colour in style.css -->
                             <td>{{ loop.index }}</td>
                             <td>{{ list[0] }}</td>
                             <td>{{ list[1] }}</td>

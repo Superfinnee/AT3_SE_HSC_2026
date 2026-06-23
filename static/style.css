@@ -30,7 +30,7 @@
     color: #0055b3;
     line-height: 1.4;
     white-space: nowrap;
-    pointer-events: none;
+    pointer-events: none; /* absolutely positioned over the nav, so without this it'd eat click events on the buttons behind it */
 }
 
 .nav-btn {
@@ -367,7 +367,7 @@ body {
     padding: 8px 16px;
     min-width: 0;
     overflow-x: auto;
-    font-size: clamp(0.5rem, 1.8vw, 1rem);
+    font-size: clamp(0.5rem, 1.8vw, 1rem); /* shrinks text on smaller desktops so a long journey doesn't immediately overflow */
 }
 
 .stationName {
@@ -611,8 +611,7 @@ span.data {
     background-color: #f7f9fc;
 }
 
-/* Line leaderboard — each row gets the line's brand colour */
-/* Line leaderboard — each row gets the line's brand colour, no hover change */
+/* Line leaderboard — each row gets the brand colour for that line, no hover tint */
 .stat-table tr.line-row td { color: #fff; font-weight: 600; }
 .stat-table tr.line-M1 { background-color: var(--M1); }
 .stat-table tr.line-T1 { background-color: var(--T1); }
@@ -624,7 +623,7 @@ span.data {
 .stat-table tr.line-T7 { background-color: var(--T7); }
 .stat-table tr.line-T8 { background-color: var(--T8); }
 .stat-table tr.line-T9 { background-color: var(--T9); }
-#line-table tbody tr:hover { background-color: unset; filter: none; }
+#line-table tbody tr:hover { background-color: unset; filter: none; } /* override the normal grey hover — coloured rows look bad with it */
 
 
 /* =============================================
