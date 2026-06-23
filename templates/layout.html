@@ -23,6 +23,8 @@
         {% endif %}
         {% endwith %}
     </div>
+    <!--{# login.html and register.html override this block with an empty one to hide the nav —
+       there's nothing to navigate to if you haven't logged in yet #}-->
     {% block buttons %}
     <nav class="nav-bar">
         <a class="nav-btn" href="{{ url_for('index') }}">Home</a>

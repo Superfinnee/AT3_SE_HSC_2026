@@ -1,9 +1,11 @@
 {% extends "layout.html" %}
 
+{# Override the nav block with nothing — same reason as login.html #}
 {% block buttons %}{% endblock %}
 
 {% block body %}
 
+<!--{# Registration page, bunch of inputs that are sanitised in the backend #}-->
 <div class="auth-page">
     <form class="auth-card" method="POST" action="/register">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
